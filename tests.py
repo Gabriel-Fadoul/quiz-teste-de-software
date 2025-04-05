@@ -1,6 +1,16 @@
 import pytest
 from model import Question
 
+@pytest.fixture
+def question_test_template():
+    question = Question(title='q1')
+    question.add_choice('a', False)
+    question.add_choice('b', False)
+    question.add_choice('c', True)
+    question.add_choice('d', False)
+    question.add_choice('e', False)
+    return question
+
 
 def test_create_question():
     question = Question(title='q1')
@@ -90,7 +100,17 @@ def test_select_choices_invalid_choices():
     assert q.select_choices([a.id]) == []
 
 def test_set_correct_choices_valid():
-    q = Question("Q?")
+    q = Question("Question test")
     a = q.add_choice("A")
     q.set_correct_choices([a.id])
     assert a.is_correct is True
+    
+def test_set_correct_choices_invalid_id(question_test_template):
+    with pytest.raises(Exception, match="Invalid choice id"):
+        question_test_template.set_correct_choices([999])
+        
+def test_add_choice_increment_id(question_test_template):
+    c1 = question_test_template.add_choice("A")
+    c2 = question_test_template.add_choice("B")
+    assert c1.id == 6
+    assert c2.id == 7
